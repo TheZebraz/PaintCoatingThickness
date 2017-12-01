@@ -13,8 +13,8 @@ public class Presenter {
 
     private boolean isPlaying = false;
 
-    private float frequencyLeft = 300;
-    private float frequencyRight = 400;
+    private float frequencyLeft = 0;
+    private float frequencyRight = 0;
 
     private final int SAMPLE_RATE = 44100;
 
@@ -59,8 +59,7 @@ public class Presenter {
         public void run() {
             float angleLeft = 0;
             float angleRight = 0;
-            float deltaLeft = (float) (Math.PI) * frequencyLeft / SAMPLE_RATE;
-            float deltaRight = (float) (Math.PI) * frequencyRight / SAMPLE_RATE;
+
             while (isPlaying) {
                 short[] buffer = new short[minSize];
                 for (int i = 0; i < buffer.length / 2; i++) {
@@ -68,6 +67,8 @@ public class Presenter {
                     buffer[i * 2 + 1] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleLeft)));
                     buffer[i * 2] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleRight)));
 
+                    float deltaLeft = (float) (Math.PI) * frequencyLeft / SAMPLE_RATE;
+                    float deltaRight = (float) (Math.PI) * frequencyRight / SAMPLE_RATE;
                     angleLeft += deltaLeft;
                     angleRight += deltaRight;
                 }
@@ -76,9 +77,16 @@ public class Presenter {
         }
     });
 
+    public void setRightFrequency(Integer value) {
+        frequencyRight = value;
+    }
+
+    public void setLeftFrequency(Integer value) {
+        frequencyLeft = value;
+    }
 
 
-   /// private static final int SAMPLE_RATE = 44100;
+    /// private static final int SAMPLE_RATE = 44100;
 //    private static final int RECORD_FRAME_SIZE = (int) Math.pow(2, 14);
 //    private static final int FRAME_COUNT_IN_DATA = 1;
 //    private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;

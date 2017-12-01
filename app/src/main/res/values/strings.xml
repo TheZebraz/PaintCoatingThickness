@@ -4,4 +4,9 @@
 
     <string name="on">on</string>
     <string name="off">off</string>
+    <string name="frequency">Frequency</string>
+    <string name="play">Play</string>
+    <string name="stop">Stop</string>
+    <string name="right_chanel_name">R</string>
+    <string name="amplitude">Amplitude</string>
 </resources>
