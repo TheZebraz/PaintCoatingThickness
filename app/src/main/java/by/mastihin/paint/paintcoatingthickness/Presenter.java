@@ -3,7 +3,14 @@ package by.mastihin.paint.paintcoatingthickness;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.media.MediaRecorder;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.RequiresApi;
 
 /**
  * Created by AndrewEvtukhov on 01.12.2017.
@@ -11,26 +18,47 @@ import android.media.AudioTrack;
 
 public class Presenter {
 
+    public static final int RECORDER_BUFFER_SIZE = 1000;
+    public static final String EXTRA_DATA = "EXTRA_DATA";
+    private final Handler handler;
     private boolean isPlaying = false;
 
     private float frequencyLeft = 0;
     private float frequencyRight = 0;
 
-    private final int SAMPLE_RATE = 44100;
+    private static final int SAMPLE_RATE = 44100;
+
+    private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+    private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+    private static final int AUDIO_SOURCE = MediaRecorder.AudioSource.DEFAULT;
 
     private int minSize;
     private AudioTrack audioTrack;
 
+    AudioRecord audioRecord;
+
     private MainView view;
     private Context context;
 
-    public Presenter(Context context, MainView view) {
+    public Presenter(Context context, MainView view, Handler handler) {
         this.context = context;
         this.view = view;
+        this.handler = handler;
         initAudio();
     }
 
     private void initAudio() {
+        initPlayer();
+        initRecorder();
+    }
+
+    private void initRecorder() {
+        int minInternalBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+        audioRecord = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, RECORDER_BUFFER_SIZE);
+        audioRecord.startRecording();
+    }
+
+    private void initPlayer() {
         minSize = AudioTrack.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, minSize, AudioTrack.MODE_STREAM);
@@ -38,9 +66,10 @@ public class Presenter {
     }
 
     public void play() {
-        if (!isPlaying && mSoundThread.getState() == Thread.State.NEW) {
+        if (!isPlaying && mSoundThread.getState() == Thread.State.NEW && mRecordingThread.getState() == Thread.State.NEW) {
             isPlaying = true;
             mSoundThread.start();
+            mRecordingThread.start();
             updateState();
         }
     }
@@ -85,38 +114,23 @@ public class Presenter {
         frequencyLeft = value;
     }
 
+    private Thread mRecordingThread = new Thread(new Runnable() {
+        @RequiresApi(api = Build.VERSION_CODES.M)
+        @Override
+        public void run() {
+            while (isPlaying) {
+                short[] buffer = new short[RECORDER_BUFFER_SIZE];
+                audioRecord.read(buffer, 0, RECORDER_BUFFER_SIZE, AudioRecord.READ_BLOCKING);
+                showData(buffer);
+            }
+        }
+    });
 
-    /// private static final int SAMPLE_RATE = 44100;
-//    private static final int RECORD_FRAME_SIZE = (int) Math.pow(2, 14);
-//    private static final int FRAME_COUNT_IN_DATA = 1;
-//    private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
-//    private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
-//    private static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
-//
-//    private float frequencyLeft = 300;
-//    private float frequencyRight = 1000;
-//
-//    private double phase = (Math.PI)/2;
-//
-//
-//    private Thread mRecordingThread = new Thread(new Runnable() {
-//        @Override
-//        public void run() {
-//            AudioRecord audioRecord;
-//            short[] buffer;
-//
-////            audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, audioFormat, internalBufferSize * 4);
-////            buffer = new short[this.bufferSize];
-////            int minInternalBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
-////            while (true) {
-////                for (int i = 0; i < buffer.length / 2; i++) {
-////                    buffer[i * 2 + 1] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleLeft)));
-////                    buffer[i * 2] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleRight)));
-////                    angleLeft += (float) (Math.PI) * frequencyLeft / SAMPLE_RATE;
-////                    angleRight += (float) (Math.PI) * frequencyRight / SAMPLE_RATE;
-////                }
-////                audioTrack.write(buffer, 0, buffer.length);
-////            }
-//        }
-//    });
+    private void showData(short[] buffer) {
+        Message message = new Message();
+        Bundle bundle = new Bundle();
+        bundle.putShortArray(EXTRA_DATA, buffer);
+        message.setData(bundle);
+        handler.sendMessage(message);
+    }
 }

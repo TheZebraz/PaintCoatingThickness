@@ -1,9 +1,24 @@
 package by.mastihin.paint.paintcoatingthickness;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -12,11 +27,17 @@ import butterknife.OnTextChanged;
 
 public class MainActivity extends Activity implements MainView {
 
+    public static final int REQUEST_CODE = 123;
     @BindView(R.id.state)
     TextView stateText;
 
-    Presenter presenter;
+    @BindView(R.id.chart)
+    LineChart chart;
 
+    Presenter presenter;
+    private Handler handler;
+
+    @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,7 +45,30 @@ public class MainActivity extends Activity implements MainView {
 
         ButterKnife.bind(this);
 
-        presenter = new Presenter(this, this);
+        handler = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                showValues(msg.getData().getShortArray(Presenter.EXTRA_DATA));
+            };
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_CODE);
+        } else {
+            presenter = new Presenter(this, this, handler);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    presenter = new Presenter(this, this, handler);
+                } else {
+                    Toast.makeText(this, "No permissions", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     @OnClick(R.id.play)
@@ -62,5 +106,23 @@ public class MainActivity extends Activity implements MainView {
     @Override
     public void setStateText(String state) {
         stateText.setText(getString(R.string.stateText, state));
+    }
+
+    public void showValues(short[] data){
+        List<Entry> entries = new ArrayList<Entry>();
+
+        for (int i = 0; i < data.length; i++) {
+            entries.add(new Entry(i, data[i]));
+        }
+
+        LineDataSet dataSet = new LineDataSet(entries, null); // add entries to dataset
+        dataSet.setColor(Color.GRAY);
+        dataSet.setLineWidth(1f);
+        dataSet.setFillColor(Color.GRAY);
+        dataSet.setDrawCircles(false);
+
+        LineData lineData = new LineData(dataSet);
+        chart.setData(lineData);
+        chart.invalidate(); // refresh
     }
 }
