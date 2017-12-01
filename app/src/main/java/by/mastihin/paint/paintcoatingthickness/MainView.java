@@ -6,5 +6,5 @@ package by.mastihin.paint.paintcoatingthickness;
 
 interface MainView {
 
-
+    void setStateText(String stateText);
 }

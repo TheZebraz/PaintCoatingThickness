@@ -2,11 +2,16 @@ package by.mastihin.paint.paintcoatingthickness;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.TextView;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainActivity extends Activity implements MainView {
+
+    @BindView(R.id.state)
+    TextView stateText;
 
     Presenter presenter;
 
@@ -17,7 +22,7 @@ public class MainActivity extends Activity implements MainView {
 
         ButterKnife.bind(this);
 
-        presenter = new Presenter(this);
+        presenter = new Presenter(this, this);
     }
 
     @OnClick(R.id.play)
@@ -30,4 +35,8 @@ public class MainActivity extends Activity implements MainView {
         presenter.stop();
     }
 
+    @Override
+    public void setStateText(String state) {
+        stateText.setText(getString(R.string.stateText, state));
+    }
 }

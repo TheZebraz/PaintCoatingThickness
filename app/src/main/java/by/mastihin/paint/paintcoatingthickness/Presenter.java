@@ -1,5 +1,6 @@
 package by.mastihin.paint.paintcoatingthickness;
 
+import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -15,31 +16,42 @@ public class Presenter {
     private float frequencyLeft = 300;
     private float frequencyRight = 400;
 
-    final int SAMPLE_RATE = 44100;
+    private final int SAMPLE_RATE = 44100;
 
-    int minSize;
-    AudioTrack audioTrack;
+    private int minSize;
+    private AudioTrack audioTrack;
 
-    MainView mView;
+    private MainView view;
+    private Context context;
 
-    public Presenter(MainView view) {
+    public Presenter(Context context, MainView view) {
+        this.context = context;
+        this.view = view;
+        initAudio();
+    }
+
+    private void initAudio() {
         minSize = AudioTrack.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT);
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_STEREO, AudioFormat.ENCODING_PCM_16BIT, minSize, AudioTrack.MODE_STREAM);
         audioTrack.play();
-
-        mView = view;
     }
 
     public void play() {
         if (!isPlaying && mSoundThread.getState() == Thread.State.NEW) {
             isPlaying = true;
             mSoundThread.start();
+            updateState();
         }
     }
 
     public void stop() {
         isPlaying = false;
+        updateState();
+    }
+
+    private void updateState() {
+        view.setStateText(isPlaying ? context.getString(R.string.on) : context.getString(R.string.off));
     }
 
     private Thread mSoundThread = new Thread(new Runnable() {
@@ -47,13 +59,17 @@ public class Presenter {
         public void run() {
             float angleLeft = 0;
             float angleRight = 0;
+            float deltaLeft = (float) (Math.PI) * frequencyLeft / SAMPLE_RATE;
+            float deltaRight = (float) (Math.PI) * frequencyRight / SAMPLE_RATE;
             while (isPlaying) {
                 short[] buffer = new short[minSize];
                 for (int i = 0; i < buffer.length / 2; i++) {
+
                     buffer[i * 2 + 1] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleLeft)));
                     buffer[i * 2] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleRight)));
-                    angleLeft += (float) (Math.PI) * frequencyLeft / SAMPLE_RATE;
-                    angleRight += (float) (Math.PI) * frequencyRight / SAMPLE_RATE;
+
+                    angleLeft += deltaLeft;
+                    angleRight += deltaRight;
                 }
                 audioTrack.write(buffer, 0, buffer.length);
             }
