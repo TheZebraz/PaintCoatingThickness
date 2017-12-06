@@ -58,7 +58,7 @@ public class Presenter {
 
     private void initRecorder() {
         int minInternalBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
-        audioRecord = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, RECORDER_BUFFER_SIZE);
+        audioRecord = new AudioRecord(AUDIO_SOURCE, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, minInternalBufferSize);
         audioRecord.startRecording();
     }
 
@@ -124,7 +124,7 @@ public class Presenter {
         public void run() {
             while (isPlaying) {
                 short[] buffer = new short[RECORDER_BUFFER_SIZE];
-                audioRecord.read(buffer, 0, RECORDER_BUFFER_SIZE, AudioRecord.READ_BLOCKING);
+                audioRecord.read(buffer, 0, RECORDER_BUFFER_SIZE);
                 showData(buffer);
             }
         }
