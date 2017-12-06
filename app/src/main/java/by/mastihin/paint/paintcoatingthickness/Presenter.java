@@ -18,13 +18,17 @@ import android.support.annotation.RequiresApi;
 
 public class Presenter {
 
-    public static final int RECORDER_BUFFER_SIZE = 1000;
+    public static final int RECORDER_BUFFER_SIZE = 2000;
     public static final String EXTRA_DATA = "EXTRA_DATA";
+    public static final int EXPERIMENT_LENGHT = 200000;
+    public static final int EXPERIMENT_FREQUENCY = 12000;
     private final Handler handler;
     private boolean isPlaying = false;
 
     private float frequencyLeft = 0;
     private float frequencyRight = 0;
+
+    private double phase = 0;
 
     private static final int SAMPLE_RATE = 44100;
 
@@ -94,7 +98,7 @@ public class Presenter {
                 for (int i = 0; i < buffer.length / 2; i++) {
 
                     buffer[i * 2 + 1] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleLeft)));
-                    buffer[i * 2] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleRight)));
+                    buffer[i * 2] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleRight + phase)));
 
                     float deltaLeft = (float) (Math.PI) * frequencyLeft / SAMPLE_RATE;
                     float deltaRight = (float) (Math.PI) * frequencyRight / SAMPLE_RATE;
@@ -133,4 +137,38 @@ public class Presenter {
         message.setData(bundle);
         handler.sendMessage(message);
     }
+
+    public  void setPhase(int i) {
+        phase = (float)i / (float) 100;
+        view.setValue(phase);
+    }
+
+    void startExperiment(){
+        isPlaying = true;
+        mExperimentThread.start();
+        mRecordingThread.start();
+    }
+
+    private Thread mExperimentThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            float angleLeft = 0;
+            float angleRight = 0;
+
+            while (isPlaying) {
+                short[] buffer = new short[EXPERIMENT_LENGHT];
+                for (int i = 0; i < EXPERIMENT_LENGHT/2; i++) {
+                    phase = (double) (i*2/(EXPERIMENT_LENGHT/628))/(float)100;
+                    buffer[i * 2 + 1] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleLeft)));
+                    buffer[i * 2] = (short) (Short.MAX_VALUE * ((float) Math.sin(angleRight + phase)));
+
+                    float deltaLeft = (float) (Math.PI) * EXPERIMENT_FREQUENCY / SAMPLE_RATE;
+                    float deltaRight = (float) (Math.PI) * EXPERIMENT_FREQUENCY / SAMPLE_RATE;
+                    angleLeft += deltaLeft;
+                    angleRight += deltaRight;
+                }
+                audioTrack.write(buffer, 0, EXPERIMENT_LENGHT);
+            }
+        }
+    });
 }

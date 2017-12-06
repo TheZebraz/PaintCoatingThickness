@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,8 +32,14 @@ public class MainActivity extends Activity implements MainView {
     @BindView(R.id.state)
     TextView stateText;
 
+    @BindView(R.id.phaseValue)
+    TextView phaseValue;
+
     @BindView(R.id.chart)
     LineChart chart;
+
+    @BindView(R.id.phase)
+    SeekBar phase;
 
     Presenter presenter;
     private Handler handler;
@@ -45,6 +52,8 @@ public class MainActivity extends Activity implements MainView {
 
         ButterKnife.bind(this);
 
+        setupPhase();
+
         handler = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 showValues(msg.getData().getShortArray(Presenter.EXTRA_DATA));
@@ -56,6 +65,25 @@ public class MainActivity extends Activity implements MainView {
         } else {
             presenter = new Presenter(this, this, handler);
         }
+    }
+
+    private void setupPhase() {
+        phase.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                presenter.setPhase(i);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     @Override
@@ -71,6 +99,10 @@ public class MainActivity extends Activity implements MainView {
         }
     }
 
+    public void setValue(double newValue){
+        phaseValue.setText(Double.toString(newValue));
+    }
+
     @OnClick(R.id.play)
     void play(){
         presenter.play();
@@ -79,6 +111,11 @@ public class MainActivity extends Activity implements MainView {
     @OnClick(R.id.stop)
     void stop(){
         presenter.stop();
+    }
+
+    @OnClick(R.id.experiment)
+    void experiment(){
+        presenter.startExperiment();
     }
 
     @OnTextChanged(R.id.edit_text_right_frequency_value)

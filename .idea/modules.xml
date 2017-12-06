@@ -3,10 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PaintCoatingThickness.iml" filepath="$PROJECT_DIR$/PaintCoatingThickness.iml" />
-      <module fileurl="file://C:\AndroidStudioProjects\PaintCoatingThickness\PaintCoatingThickness.iml" filepath="C:\AndroidStudioProjects\PaintCoatingThickness\PaintCoatingThickness.iml" />
       <module fileurl="file://C:\Users\AndrewEvtukhov\StudioProjects\PaintCoatingThickness\.idea\PaintCoatingThickness.iml" filepath="C:\Users\AndrewEvtukhov\StudioProjects\PaintCoatingThickness\.idea\PaintCoatingThickness.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\AndroidStudioProjects\PaintCoatingThickness\app\app.iml" filepath="C:\AndroidStudioProjects\PaintCoatingThickness\app\app.iml" />
     </modules>
   </component>
 </project>

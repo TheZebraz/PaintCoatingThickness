@@ -9,4 +9,6 @@ import java.util.List;
 interface MainView {
 
     void setStateText(String stateText);
+
+    void setValue(double newValue);
 }

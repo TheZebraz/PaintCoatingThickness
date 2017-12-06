@@ -83,6 +83,7 @@
         android:layout_height="wrap_content"
         android:inputType="number"
         android:text="0"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_amplitude_label"
         app:layout_constraintStart_toStartOf="@+id/edit_text_right_frequency_value"
         app:layout_constraintTop_toTopOf="@+id/text_view_amplitude_label"
@@ -95,6 +96,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16sp"
         android:text="@string/amplitude"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="@+id/text_view_frequency_label"
         app:layout_constraintTop_toBottomOf="@+id/text_view_frequency_label"/>
 
@@ -140,6 +142,7 @@
         android:layout_height="wrap_content"
         android:inputType="number"
         android:text="0"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_left_amplitude_label"
         app:layout_constraintStart_toStartOf="@+id/edit_text_left_frequency_value"
         app:layout_constraintTop_toTopOf="@+id/text_view_left_amplitude_label"
@@ -152,8 +155,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16sp"
         android:text="@string/amplitude"
+        android:visibility="gone"
         app:layout_constraintStart_toStartOf="@+id/text_view_left_frequency_label"
         app:layout_constraintTop_toBottomOf="@+id/text_view_left_frequency_label"/>
+
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"
@@ -161,9 +166,45 @@
         android:layout_height="200dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_text_right_amplitude_value"/>
+        app:layout_constraintTop_toBottomOf="@+id/phase"/>
+
+    <SeekBar
+        android:id="@+id/phase"
+        style="@android:style/Widget.DeviceDefault.Light.SeekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:max="628"
+        android:progress="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_left"/>
+
+    <TextView
+        android:id="@+id/phaseValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="6,28"
+        app:layout_constraintBottom_toTopOf="@+id/phase"
+        app:layout_constraintEnd_toEndOf="@+id/phase"/>
+
+    <Button
+        android:id="@+id/experiment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Experiment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chart"/>
 
 </android.support.constraint.ConstraintLayout>
